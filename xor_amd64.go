@@ -10,28 +10,21 @@ import "unsafe"
 
 const wordSize = int(unsafe.Sizeof(uintptr(0)))
 
-// XOR xors the bytes in src and with and writes the result to dst.
-// The destination is assumed to have enough space. Returns the
-// number of bytes xor'd.
-func xor(dst, src, with []byte) int {
+// xor xors the bytes in dst with src and writes the result to dst.
+// The destination is assumed to have enough space.
+func xor(dst, src []byte) {
 	n := len(src)
-	if len(with) < n {
-		n = len(with)
-	}
 
 	w := n / wordSize
 	if w > 0 {
 		dstPtr := *(*[]uintptr)(unsafe.Pointer(&dst))
 		srcPtr := *(*[]uintptr)(unsafe.Pointer(&src))
-		withPtr := *(*[]uintptr)(unsafe.Pointer(&with))
 		for i, v := range srcPtr[:w] {
-			dstPtr[i] = withPtr[i] ^ v
+			dstPtr[i] ^= v
 		}
 	}
 
 	for i := (n & (^(wordSize - 1))); i < n; i++ {
-		dst[i] = src[i] ^ with[i]
+		dst[i] ^= src[i]
 	}
-
-	return n
 }

@@ -137,12 +137,12 @@ func (h *macFunc) Write(msg []byte) (int, error) {
 	if h.off > 0 {
 		dif := bs - h.off
 		if n > dif {
-			xor(h.buf[h.off:], h.buf[h.off:], msg[:dif])
+			xor(h.buf[h.off:], msg[:dif])
 			msg = msg[dif:]
 			h.cipher.Encrypt(h.buf, h.buf)
 			h.off = 0
 		} else {
-			xor(h.buf[h.off:], h.buf[h.off:], msg)
+			xor(h.buf[h.off:], msg)
 			h.off += n
 			return n, nil
 		}
@@ -154,14 +154,14 @@ func (h *macFunc) Write(msg []byte) (int, error) {
 			nn -= bs
 		}
 		for i := 0; i < nn; i += bs {
-			xor(h.buf, h.buf, msg[i:i+bs])
+			xor(h.buf, msg[i:i+bs])
 			h.cipher.Encrypt(h.buf, h.buf)
 		}
 		msg = msg[nn:]
 	}
 
 	if length := len(msg); length > 0 {
-		xor(h.buf[h.off:], h.buf[h.off:], msg)
+		xor(h.buf[h.off:], msg)
 		h.off += length
 	}
 
@@ -175,11 +175,13 @@ func (h *macFunc) Sum(b []byte) []byte {
 	// caller can keep writing and suming.
 	hash := make([]byte, blocksize)
 
-	k := h.k0
 	if h.off < blocksize {
-		k = h.k1
+		copy(hash, h.k1)
+	} else {
+		copy(hash, h.k0)
 	}
-	xor(hash, k, h.buf)
+
+	xor(hash, h.buf)
 	if h.off < blocksize {
 		hash[h.off] ^= 0x80
 	}

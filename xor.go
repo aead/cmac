@@ -6,21 +6,10 @@
 
 package cmac
 
-// XOR xors the bytes in src and with and writes the result to dst.
-// The destination is assumed to have enough space. Returns the
-// number of bytes xor'd.
-func XOR(dst, src, with []byte) int {
-	var a, b []byte
-	if len(src) <= len(with) {
-		a = src
-		b = with
-	} else {
-		b = src
-		a = with
+// xor xors the bytes in dst with src and writes the result to dst.
+// The destination is assumed to have enough space.
+func xor(dst, src []byte) {
+	for i, v := range src {
+		dst[i] ^= v
 	}
-
-	for i, v := range a {
-		dst[i] = b[i] ^ v
-	}
-	return len(a)
 }
